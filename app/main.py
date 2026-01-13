@@ -22,7 +22,7 @@ app.add_middleware(
 #! ROOT.#########################################################################################
 @app.get("/")
 def root():
-    return {"message": "Welcome to my API"}
+    return {"message": "Heloo world!!"}
 
 
 app.include_router(user.router) #!<- this is use to include the post file which is in router so it responds the app and calls.
