@@ -19,9 +19,9 @@ router = APIRouter(
 )
 
 #! GETS ALL POSTS.#########################################################################################
-@router.get("/",response_model=List[pydantric_schemas.PostOut]) #! have to use list for response_model it will not work as it work for other so imported list from typing
-def get_posts(db : Session = Depends(get_db), current_user : int = Depends(oauth2.get_currrnt_user), limit:int=10, skip:int=0, 
-              search:Optional[str]=""):
+@router.get("/", response_model=List[pydantric_schemas.PostOut])  #! have to use list for response_model it will not work as it work for other so imported list from typing
+def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_currrnt_user), limit: int = 10, skip: int = 0,
+              search: Optional[str] = ""):
         # cursor.execute("""SELECT * FROM posts """)
         # posts = cursor.fetchall()
     # posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all() #! it's for to turn post private like insta.
@@ -37,8 +37,8 @@ def get_posts(db : Session = Depends(get_db), current_user : int = Depends(oauth
 
 
 #! GET 1 POST VIA ID.#########################################################################################
-@router.get("/{id}",response_model=pydantric_schemas.PostOut)
-def get_post_via_id(id:int, db : Session = Depends(get_db), current_user : int = Depends(oauth2.get_currrnt_user)):
+@router.get("/{id}", response_model=pydantric_schemas.PostOut)
+def get_post_via_id(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_currrnt_user)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s """, str(id))
     # post = cursor.fetchone()
     post = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
@@ -48,8 +48,8 @@ def get_post_via_id(id:int, db : Session = Depends(get_db), current_user : int =
 
 
 #! CREATE POST.#########################################################################################
-@router.post("/",status_code=status.HTTP_201_CREATED, response_model=pydantric_schemas.Post)
-def create_post(post : pydantric_schemas.CreatePost, db : Session = Depends(get_db), current_user : int = Depends(oauth2.get_currrnt_user)):
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=pydantric_schemas.Post)
+def create_post(post: pydantric_schemas.CreatePost, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_currrnt_user)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s, %s, %s) RETURNING * """,(post.title, post.content, post.published))
     # new_post = cursor.fetchone()
     # con.commit()
@@ -64,16 +64,16 @@ def create_post(post : pydantric_schemas.CreatePost, db : Session = Depends(get_
 
 #! DELETE POST VIA ID.#########################################################################################
 @router.delete("/{id}")
-def delete_post_via_id(id:int, db : Session = Depends(get_db), current_user : int = Depends(oauth2.get_currrnt_user)):
+def delete_post_via_id(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_currrnt_user)):
     # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING * """, (str(id)))
     # post = cursor.fetchone()
     
     post_query = db.query(models.Post).filter(models.Post.id == id)
     own = post_query.first()
-  
-    if post_query.first() == None:
+
+    if own is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id:{id} does not exist.")
-    
+
     if own.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Not Authorized to perform requested task.")
 
@@ -83,8 +83,8 @@ def delete_post_via_id(id:int, db : Session = Depends(get_db), current_user : in
 
 
 #! UPDATE POST VIA ID#########################################################################################
-@router.put("/{id}",response_model=pydantric_schemas.Post)
-def update_post(id : int, post : pydantric_schemas.CreatePost, db : Session = Depends(get_db), current_user : int = Depends(oauth2.get_currrnt_user)):
+@router.put("/{id}", response_model=pydantric_schemas.Post)
+def update_post(id: int, post: pydantric_schemas.CreatePost, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_currrnt_user)):
 
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """, (post.title, post.content, post.published, str(id)))
     # updated_post = cursor.fetchone()
@@ -94,14 +94,14 @@ def update_post(id : int, post : pydantric_schemas.CreatePost, db : Session = De
 
    
 
-    if updated_post==None:
+    if updated_post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id:{id} does not exist.")
-    
+
     if updated_post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Not Authorized to perform requested task.")
 
-    
-    query.update(post.dict(), synchronize_session=False)
+    post_dict = post.model_dump()
+    query.update(post_dict, synchronize_session=False)  # type: ignore
     
     db.commit()
     
