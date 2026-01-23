@@ -52,7 +52,7 @@ jobs:
             - name: run tests with pytest
               env:
                 # OVERRIDE: Tell the app to look for the _test database
-                DATABASE_NAME: ${{ secrets.DATABASE_NAME }}_test
+                DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
                 # OVERRIDE: Ensure the app talks to the local service container
                 DATABASE_HOSTNAME: localhost
               run: |
