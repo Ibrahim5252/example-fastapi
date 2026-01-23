@@ -1,7 +1,7 @@
 """auto table created
 
 Revision ID: 1ffed683d976
-Revises: 
+Revises: 001_initial
 Create Date: 2026-01-11 22:46:52.822462
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '1ffed683d976'
-down_revision: Union[str, Sequence[str], None] = None
+down_revision: Union[str, Sequence[str], None] = '001_initial'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
