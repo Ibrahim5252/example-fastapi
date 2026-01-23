@@ -8,7 +8,6 @@ jobs:
             name: testing
         runs-on: ubuntu-latest
 
-        # Global env variables for the job
         env:
             DATABASE_HOSTNAME : ${{ secrets.DATABASE_HOSTNAME }}
             DATABASE_PORT : ${{ secrets.DATABASE_PORT }}
@@ -24,7 +23,6 @@ jobs:
                 image: postgres:15
                 env:
                     POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-                    # This creates the DB with the _test suffix
                     POSTGRES_DB: ${{ secrets.DATABASE_NAME }}_test
                 ports:
                 - 5432:5432
@@ -51,9 +49,8 @@ jobs:
 
             - name: run tests with pytest
               env:
-                # OVERRIDE: Tell the app to look for the _test database
-                DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-                # OVERRIDE: Ensure the app talks to the local service container
+                # FIX: Added _test here to match the 'services' block above
+                DATABASE_NAME: ${{ secrets.DATABASE_NAME }}_test
                 DATABASE_HOSTNAME: localhost
               run: |
                 pip install pytest
