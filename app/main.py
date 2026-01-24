@@ -1,16 +1,22 @@
 from fastapi import FastAPI
-from app.router import auth
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
 from . import models
 from .database import engine
 from .router import user, post, auth, vote
 from .config import settings
-from fastapi.middleware.cors import CORSMiddleware
 
-models.Base.metadata.create_all(bind=engine)
+# This ensures tables are created only when the server starts
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    models.Base.metadata.create_all(bind=engine)
+    yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -18,18 +24,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-        
-#! ROOT.#########################################################################################
+
 @app.get("/")
 def root():
-    return {"message": "heloo world!!"}
+    return {"message": "Hello World!!"}
 
-
-app.include_router(user.router) #!<- this is use to include the post file which is in router so it responds the app and calls.
-app.include_router(post.router) #!   so in post & user file will have "@router.get" rather than "@app.get".
+# Include Routers
+app.include_router(user.router)
+app.include_router(post.router)
 app.include_router(auth.router)
 app.include_router(vote.router)
-
-# git add --all
-# git commit -m "park"
-#  git push origin main

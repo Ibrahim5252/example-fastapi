@@ -5,16 +5,12 @@ on: [push, pull_request]
 jobs:
   job1:
     runs-on: ubuntu-latest
-
     environment:
       name: testing
 
-    permissions:
-      contents: read
-
     env:
-      DATABASE_HOSTNAME: ${{ secrets.DATABASE_HOSTNAME }}
-      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+      DATABASE_HOSTNAME: localhost
+      DATABASE_PORT: 5432
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
       DATABASE_NAME: ${{ secrets.DATABASE_NAME }}_test
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
@@ -27,7 +23,8 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          # MATCH THIS with the DATABASE_NAME in env above
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}_test 
         ports:
           - 5432:5432
         options: >-
@@ -45,12 +42,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Wait for Postgres
-        run: sleep 10
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run tests
         run: pytest

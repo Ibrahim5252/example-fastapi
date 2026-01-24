@@ -1,57 +1,56 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
-from sqlalchemy import Integer, Null
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, Literal
 
+# We use ConfigDict at the top level or inside specific models 
+# to allow Pydantic to read SQLAlchemy models (ORM)
 
 class PostBase(BaseModel):
-    id : Optional[int]= None
-    title : str
-    content : str
-    published : bool=True
-
+    id: Optional[int] = None
+    title: str
+    content: str
+    published: bool = True
 
 class CreatePost(BaseModel):
-    title : str
-    content : str
-    
+    title: str
+    content: str
+
 class ShowUser(BaseModel):
-    id : int
-    email : EmailStr
-    created_at : datetime
+    id: int
+    email: EmailStr
+    created_at: datetime
+    
+    # New V2 way to enable ORM mode
+    model_config = ConfigDict(from_attributes=True)
 
 class Post(PostBase):
-    # owner_id : int
-    owner : ShowUser
-
-    class Config:       #!<-this take the SQLalchemy output and read it even though it is not dict (pydantic only take dicts).
-        orm_mode = True #!<- 
+    owner: ShowUser
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class PostOut(BaseModel):
     Post: Post
-    votes : int
-
-    class Config:       #!<-this take the SQLalchemy output and read it even though it is not dict (pydantic only take dicts).
-        orm_mode = True #!<-
+    votes: int
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(BaseModel):
-    email : EmailStr
-    passwd : str
+    email: EmailStr
+    passwd: str
 
-    class Config:       #!<-this take the SQLalchemy output and read it even though it is not dict (pydantic only take dicts).
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserLogin(BaseModel):
-    email : EmailStr
-    passwd : str
+    email: EmailStr
+    passwd: str
 
 class Token(BaseModel):
-    access_token : str
-    token_type : str
+    access_token: str
+    token_type: str
 
 class TokenData(BaseModel):
-    id : Optional[str] = None
+    id: Optional[str] = None
 
 class Vote(BaseModel):
-    post_id : int
-    dir : Literal[0,1]
+    post_id: int
+    dir: Literal[0, 1]
