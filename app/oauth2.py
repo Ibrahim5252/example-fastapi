@@ -32,7 +32,7 @@ def verify_access_token(token: str, credential_expectation):
         id: str = payload.get("user_id")
         if id is None:
             raise credential_expectation
-        token_data: pydantric_schemas.TokenData = pydantric_schemas.TokenData(id=id)
+        token_data: pydantric_schemas.TokenData = pydantric_schemas.TokenData(id=str(id))
     
     except JWTError:
         raise credential_expectation
