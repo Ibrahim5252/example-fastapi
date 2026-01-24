@@ -6,7 +6,7 @@ jobs:
     job1:
         environment:
             name: testing
-        evn:
+        env:
             DATABASE_HOSTNAME: ${{Secrets.DATABASE_HOSTNAME}}
             DATABASE_PORT: ${{Secrets.DATABASE_PORT}}
             DATABASE_PASSWORD: ${{Secrets.DATABASE_PASSWORD}}
